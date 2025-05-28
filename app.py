@@ -30,7 +30,7 @@ st.markdown("""
 
 # Header
 st.markdown('<div class="title">📄 KOC Contract Generator</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">coded by Char</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Coded by Charmaine Magbuhos</div>', unsafe_allow_html=True)
 st.markdown("---")
 
 # Upload section
