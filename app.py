@@ -1,91 +1,70 @@
-import pandas as pd
+import streamlit as st
 from docxtpl import DocxTemplate
 from datetime import date
-import streamlit as st
 import io
-import zipfile
 
 st.set_page_config(page_title="KOC Contract Generator", layout="centered", page_icon="📝")
+st.title("📝 KOC Contract Generator")
 
-st.markdown("""
-<style>
-    .main {
-        background-color: #f9f9fb;
-        font-family: 'Segoe UI', sans-serif;
-    }
-    .title {
-        font-size: 2.2em;
-        font-weight: bold;
-        color: #4a4a4a;
-    }
-    .subtitle {
-        font-size: 1.1em;
-        color: #6c6c6c;
-    }
-    .stFileUploader > label {
-        font-weight: 600;
-    }
-</style>
-""", unsafe_allow_html=True)
+mode = st.radio("Choose Input Mode", ["Manual Entry for Single Contract"])
 
-# Header
-st.markdown('<div class="title">📄 KOC Contract Generator</div>', unsafe_allow_html=True)
-st.markdown('<div class="subtitle">Coded by Charmaine Magbuhos</div>', unsafe_allow_html=True)
-st.markdown("---")
+uploaded_template = st.file_uploader("📄 Upload Word Template (.docx)", type=["docx"])
 
-# Upload section
-col1, col2 = st.columns(2)
-with col1:
-    uploaded_csv = st.file_uploader("📑 Upload CSV File", type=["csv"])
-with col2:
-    uploaded_template = st.file_uploader("📄 Upload Word Template (.docx)", type=["docx"])
+if mode == "Manual Entry for Single Contract":
+    st.subheader("🧾 Fill in Influencer Contract Details")
 
-# Process files
-if uploaded_csv and uploaded_template:
-    st.success("✅ Files uploaded successfully!")
-    df = pd.read_csv(uploaded_csv)
-    df.columns = df.columns.str.strip()
-    today = date.today().isoformat()
-    zip_buffer = io.BytesIO()
+    if uploaded_template:
+        with st.form("manual_contract_form"):
+            Influencer_name = st.text_input("Influencer Name")
+            Influencer_email = st.text_input("Influencer Email")
+            Influencer_contact = st.text_input("Influencer Contact")
+            Influencer_address = st.text_input("Influencer Address")
+            platform = st.selectbox("Platform", ["TikTok", "Instagram", "YouTube", "Facebook", "Other"])
+            platform_username = st.text_input("Platform Username")
+            Influencer_links = st.text_area("Influencer Links (separate with commas)")
+            promotion_date = st.date_input("Promotion Date", value=date.today())
+            video_rate = st.number_input("Video Rate (USD)", min_value=0.0, step=1.0)
+            bonus_info = st.text_area("Bonus Info")
+            payment_method = st.selectbox("Payment Method", ["PayPal", "Bank Transfer", "GCash", "Others"])
+            payment_information = st.text_area("Payment Information")
+            payment_charges = st.number_input("Payment Charges (USD)", min_value=0.0, step=1.0)
 
-    with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
-        for index, row in df.iterrows():
+            submitted = st.form_submit_button("📄 Generate Contract")
+
+        if submitted:
             try:
                 template = DocxTemplate(uploaded_template)
 
                 context = {
-                    'Influencer_name': row['Name'],
-                    'Influencer_email': row['Email'],
-                    'Influencer_contact': row['Contact'],
-                    'Influencer_address': row['Address'],
-                    'platform': row['Platform'],
-                    'platform_username': row['Platform username'],
-                    'Influencer_links': row['Links'],
-                    'promotion_date': row['Promotion date'],
-                    'video_rate': row['video rate'],
-                    'bonus_info': row['bonus info'],
-                    'payment_method': row['Payment method'],
-                    'payment_information': row['Payment Info'],
-                    'payment_charges': row['payment charges']
+                    'Influencer_name': Influencer_name,
+                    'Influencer_email': Influencer_email,
+                    'Influencer_contact': Influencer_contact,
+                    'Influencer_address': Influencer_address,
+                    'platform': platform,
+                    'platform_username': platform_username,
+                    'Influencer_links': Influencer_links,
+                    'promotion_date': promotion_date.strftime("%Y-%m-%d"),
+                    'video_rate': video_rate,
+                    'bonus_info': bonus_info,
+                    'payment_method': payment_method,
+                    'payment_information': payment_information,
+                    'payment_charges': payment_charges
                 }
 
                 template.render(context)
 
-                safe_name = row['Name'].replace(" ", "_").replace("/", "-")
-                filename = f'FW-ARETIS_{safe_name}_{today}.docx'
+                output = io.BytesIO()
+                template.save(output)
+                output.seek(0)
 
-                doc_stream = io.BytesIO()
-                template.save(doc_stream)
-                doc_stream.seek(0)
-
-                zip_file.writestr(filename, doc_stream.read())
-
+                st.success("✅ Contract generated successfully!")
+                st.download_button(
+                    label="📥 Download Contract",
+                    data=output,
+                    file_name=f"KOC_Contract_{Influencer_name.replace(' ', '_')}.docx",
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                )
             except Exception as e:
-                st.error(f"❌ Error processing {row.get('Name', f'Row {index}')} (row {index}): {e}")
-
-    zip_buffer.seek(0)
-    st.markdown("### ✅ All contracts generated!")
-    st.download_button("📥 Download ZIP of All Contracts", zip_buffer, file_name=f"KOC_Contracts_{today}.zip", mime="application/zip")
-
-else:
-    st.info("⬆️ Upload both files above to get started.")
+                st.error(f"❌ Error generating contract: {e}")
+    else:
+        st.info("⬆️ Please upload a Word DOCX template to continue.")
