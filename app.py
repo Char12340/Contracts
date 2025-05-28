@@ -5,17 +5,47 @@ import streamlit as st
 import io
 import zipfile
 
-st.set_page_config(page_title="KOC Contract Generator", layout="centered")
-st.title("📄 KOC Contract Generator with ZIP Download")
+st.set_page_config(page_title="KOC Contract Generator", layout="centered", page_icon="📝")
 
-uploaded_csv = st.file_uploader("Upload CSV File", type=["csv"])
-uploaded_template = st.file_uploader("Upload Word Template (.docx)", type=["docx"])
+st.markdown("""
+<style>
+    .main {
+        background-color: #f9f9fb;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .title {
+        font-size: 2.2em;
+        font-weight: bold;
+        color: #4a4a4a;
+    }
+    .subtitle {
+        font-size: 1.1em;
+        color: #6c6c6c;
+    }
+    .stFileUploader > label {
+        font-weight: 600;
+    }
+</style>
+""", unsafe_allow_html=True)
 
+# Header
+st.markdown('<div class="title">📄 KOC Contract Generator</div>', unsafe_allow_html=True)
+st.markdown('<div class="subtitle">Easily generate influencer contracts in bulk from a CSV and DOCX template</div>', unsafe_allow_html=True)
+st.markdown("---")
+
+# Upload section
+col1, col2 = st.columns(2)
+with col1:
+    uploaded_csv = st.file_uploader("📑 Upload CSV File", type=["csv"])
+with col2:
+    uploaded_template = st.file_uploader("📄 Upload Word Template (.docx)", type=["docx"])
+
+# Process files
 if uploaded_csv and uploaded_template:
+    st.success("✅ Files uploaded successfully!")
     df = pd.read_csv(uploaded_csv)
     df.columns = df.columns.str.strip()
     today = date.today().isoformat()
-
     zip_buffer = io.BytesIO()
 
     with zipfile.ZipFile(zip_buffer, "a", zipfile.ZIP_DEFLATED) as zip_file:
@@ -54,4 +84,8 @@ if uploaded_csv and uploaded_template:
                 st.error(f"❌ Error processing {row.get('Name', f'Row {index}')} (row {index}): {e}")
 
     zip_buffer.seek(0)
-    st.download_button("📥 Download All Contracts (ZIP)", zip_buffer, file_name=f"KOC_Contracts_{today}.zip")
+    st.markdown("### ✅ All contracts generated!")
+    st.download_button("📥 Download ZIP of All Contracts", zip_buffer, file_name=f"KOC_Contracts_{today}.zip", mime="application/zip")
+
+else:
+    st.info("⬆️ Upload both files above to get started.")
