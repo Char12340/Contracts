@@ -54,19 +54,19 @@ if uploaded_csv and uploaded_template:
                 template = DocxTemplate(uploaded_template)
 
                 context = {
-                    'Influencer_name': row['Name'],
-                    'Influencer_email': row['Email'],
-                    'Influencer_contact': row['Contact'],
-                    'Influencer_address': row['Address'],
-                    'platform': row['Platform'],
-                    'platform_username': row['Platform username'],
-                    'Influencer_links': row['Links'],
-                    'promotion_date': row['Promotion date'],
-                    'video_rate': row['video rate'],
-                    'bonus_info': row['bonus info'],
-                    'payment_method': row['Payment method'],
-                    'payment_information': row['Payment Info'],
-                    'payment_charges': row['payment charges']
+                       'Influencer_name': row['Name'],
+    'Influencer_email': row['Email'],
+    'Influencer_contact': row['Contact'],
+    'Influencer_address': row['Address'],
+    'platform': str(row['Platform']).replace("&", " & "),
+    'platform_username': row['Platform username'],
+    'Influencer_links': row['Links'],
+    'promotion_date': row['Promotion date'],
+    'video_rate': row['video rate'],
+    'bonus_info': row['bonus info'],
+    'payment_method': row['Payment method'],
+    'payment_information': row['Payment Info'],
+    'payment_charges': row['payment charges']
                 }
 
                 template.render(context)
