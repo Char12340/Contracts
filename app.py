@@ -59,15 +59,18 @@ if uploaded_csv and uploaded_template:
                     'Influencer_email': row['Email'], 
                     'Influencer_contact': row['Contact'], 
                     'Influencer_address': row['Address'], 
-                    'platform': row['Platform'], 
+                    'platform': str(row['Platform']).replace("&", "&amp;"),
                     'platform_username': row['Platform username'], 
                     'Influencer_links': row['Links'], 
                     'promotion_date': row['Promotion date'], 
                     'video_rate': row['video rate'], 
+                    'video_number':row['Number of videos'],
+                    'total_number':row['Total'],
                     'bonus_info': row['bonus info'], 
                     'payment_method': row['Payment method'], 
                     'payment_information': row['Payment Info'], 
                     'payment_charges': row['payment charges']
+        
                 }
 
                 template.render(context)
